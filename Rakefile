@@ -1,4 +1,4 @@
-require 'bundler/gem_tasks'
+require 'bundler'
 require 'rake/testtask'
 require './lib/protoplasm/version'
 
