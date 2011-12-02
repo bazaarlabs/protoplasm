@@ -2,6 +2,24 @@ require 'beefcake'
 
 module Protoplasm
   module Types
+    module ConstLookup
+      def self.included(o)
+        o.extend(ClassMethods)
+      end
+
+      module ClassMethods
+        def lookup(val)
+          enum_map[val]
+        end
+
+        def enum_map
+          @enum_map ||= begin
+            constants.inject({}) { |h,k| h[const_get(k)] = k.to_sym; h }
+          end
+        end
+      end
+    end
+
     module Request
       NORMAL = 0
     end

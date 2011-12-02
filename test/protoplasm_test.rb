@@ -43,4 +43,9 @@ describe "Protoplasm test server" do
     end
   end
 
+  it "should do constant lookups" do
+    assert_equal :PING, ProtoplasmTest::Types::Command::Type.lookup(1)
+    assert_equal :UPCASE, ProtoplasmTest::Types::Command::Type.lookup(2)
+    assert_equal :EVEN, ProtoplasmTest::Types::Command::Type.lookup(3)
+  end
 end

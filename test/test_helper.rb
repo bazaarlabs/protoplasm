@@ -34,6 +34,7 @@ class ProtoplasmTest
     class Command
       include Beefcake::Message
       module Type
+        include Protoplasm::Types::ConstLookup
         PING   = 1
         UPCASE = 2
         EVEN   = 3
