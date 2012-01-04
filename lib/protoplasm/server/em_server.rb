@@ -74,7 +74,8 @@ module Protoplasm
       obj = type.response_class.new(*args)
       s = ''
       obj.encode(s)
-      send_data [Types::Response::NORMAL, s.size].pack("CQ")
+      send_data [Types::Response::NORMAL].pack("C")
+      send_data [s.size].pack("Q")
       send_data s
     end
   end
