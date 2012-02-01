@@ -49,15 +49,15 @@ module Protoplasm
         socket.flush
         fetch_objects = true
         while fetch_objects
-          response_byte = socket.read(1)
+          response_byte = socket.sysread(1)
           response_code = response_byte.unpack("C").first
           case response_code
           when Types::Response::NORMAL
             fetch_objects = !type.void?
             if fetch_objects
-              len_buf = socket.read(8)
+              len_buf = socket.sysread(8)
               len = len_buf.unpack("Q").first
-              data = socket.read(len)
+              data = socket.sysread(len)
               obj = type.response_class.decode(data)
               yield obj if block_given?
             end
@@ -70,6 +70,8 @@ module Protoplasm
         end
       end
       obj
+    rescue EOFError
+      @socket = nil
     end
   end
 end
