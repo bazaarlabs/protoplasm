@@ -16,9 +16,9 @@ module Protoplasm
     end
 
     def _socket
-      host, port = host_port
       count = 0
       begin
+        host, port = host_port
         @socket ||= begin
           s = TCPSocket.open(host, port)
           s.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
