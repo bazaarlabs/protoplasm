@@ -10,6 +10,19 @@ module Protoplasm
       cls
     end
 
+    def close
+      _socket.close if _socket && !_socket.closed?
+    end
+
+    def self.client(*args)
+      client = new(*args)
+      begin
+        yield client
+      ensure
+        client.close
+      end
+    end
+
     private
     def host_port
       raise "Must be implemented by the client class"
@@ -24,7 +37,7 @@ module Protoplasm
           s.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
           s
         end
-        yield @socket
+        yield @socket if block_given?
       rescue Errno::EPIPE, Errno::ECONNRESET
         count += 1
         if count > 3
