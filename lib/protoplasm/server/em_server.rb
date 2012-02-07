@@ -76,7 +76,7 @@ module Protoplasm
       obj.encode(s)
       send_data [Types::Response::NORMAL].pack("C")
       send_data [s.size].pack("Q")
-      send_data s
+      send_data s.force_encoding('BINARY')
     end
   end
 end
