@@ -70,7 +70,10 @@ module Protoplasm
             if fetch_objects
               len_buf = socket.sysread(8)
               len = len_buf.unpack("Q").first
-              data = socket.sysread(len)
+              data = ''
+              while data.size < len
+                data << socket.sysread([len - data.size, 4096].min)
+              end
               obj = type.response_class.decode(data)
               yield obj if block_given?
             end
