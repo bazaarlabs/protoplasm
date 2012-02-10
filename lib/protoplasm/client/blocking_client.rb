@@ -28,14 +28,28 @@ module Protoplasm
       raise "Must be implemented by the client class"
     end
 
-    def _socket
+    def _socket(timeout = 5)
       count = 0
       begin
         host, port = host_port
         @socket ||= begin
-          s = TCPSocket.open(host, port)
-          s.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
-          s
+          addr = Socket.getaddrinfo(host, nil)
+          sock = Socket.new(Socket.const_get(addr[0][0]), Socket::SOCK_STREAM, 0)
+
+          if timeout
+            secs = Integer(timeout)
+            usecs = Integer((timeout - secs) * 1_000_000)
+            optval = [secs, usecs].pack("l_2")
+            begin
+              io.setsockopt Socket::SOL_SOCKET, Socket::SO_RCVTIMEO, optval
+              io.setsockopt Socket::SOL_SOCKET, Socket::SO_SNDTIMEO, optval
+            rescue Exception => ex
+              # Solaris, for one, does not like/support socket timeouts.
+              @logger.info "[memcache-client] Unable to use raw socket timeouts: #{ex.class.name}: #{ex.message}" if @logger
+            end
+          end
+          sock.connect(Socket.pack_sockaddr_in(port, addr[0][3]))
+          sock
         end
         yield @socket if block_given?
       rescue Errno::EPIPE, Errno::ECONNRESET
@@ -74,7 +88,7 @@ module Protoplasm
               while data.size < len
                 data << socket.sysread([len - data.size, 4096].min)
               end
-              obj = type.response_class.decode(data)
+              obj = type.response_class.decode(data.force_encoding('BINARY'))
               yield obj if block_given?
             end
             fetch_objects = false unless type.streaming?
